@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora:42 AS base
+FROM quay.io/fedora/fedora:42
 RUN dnf upgrade --refresh
 RUN dnf install --setopt=install_weak_deps=False -y guestfs-tools
 
@@ -14,9 +14,5 @@ WORKDIR /home/virt
 
 ENV LIBGUESTFS_BACKEND=direct
 
-FROM base AS rootless
 USER virt
-CMD ["/usr/bin/guestfish", "-a", "guest.img"]
-
-FROM base AS rootful
 CMD ["/usr/bin/guestfish", "-a", "guest.img"]
