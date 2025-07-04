@@ -1,6 +1,6 @@
 # `guestfs-tools` &mdash; inspect and modify VM images.
 
-A Fedora-based image containing `guestfs-tools` and it dependencies.
+A Fedora-based image containing `guestfs-tools` and its dependencies.
 
 The binaries are run as a non-root user inside the container, so privilege mapping is necessary. `--userns=keep-id` works with Podman.
 
