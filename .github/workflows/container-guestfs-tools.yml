@@ -11,7 +11,9 @@ on:
     - cron: "0 6 * * 1"
 
 env:
-  IMAGE: ghcr.io/${{ github.repository_owner }}/guestfs_tools
+  IMAGE_NAME: guestfs-tools
+  IMAGE: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+  GET_VERSION_CMD: rpm --query --queryformat '%{VERSION}\n' guestfs-tools
 
 jobs:
   build:
@@ -19,33 +21,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: run buildah
-        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
-        with:
-          tags: guestfs-tools:_build
-          context: containers/guestfs-tools
-          containerfiles: ./Containerfile
-          oci: true
-
-      - name: get guestfs-tools version
-        id: get_version
         run: >-
-          pkg_version="$(
-            podman run --rm guestfs-tools:_build
-            rpm --query --queryformat '%{VERSION}\n' guestfs-tools
-          )"
+          buildah bud --format oci --tls-verify=true
+          -t ${IMAGE_NAME}:_build
+          containers/${IMAGE_NAME}
 
-          printf 'pkg_version=%s\n' "$pkg_version" >> "$GITHUB_OUTPUT"
+      - name: get binary version
+        id: get_version
+        run: |-
+          bin_version="$(podman run --rm ${IMAGE_NAME}:_build ${GET_VERSION_CMD})"
+          printf 'bin_version=%s\n' "$bin_version" >> "$GITHUB_OUTPUT"
 
       - name: tag the container image
         id: tag_image
         run: |-
           img_tags="$img_tags ${IMAGE}:latest"
-          img_tags="$img_tags ${IMAGE}:${{ steps.get_version.outputs.pkg_version }}"
+          img_tags="$img_tags ${IMAGE}:${{ steps.get_version.outputs.bin_version }}"
           img_tags="$img_tags ${IMAGE}:$(date -I)"
-          podman tag guestfs-tools:_build "$img_tags"
+          podman tag "${IMAGE_NAME}:_build" "$img_tags"
           printf 'img_tags=%s\n' "$img_tags" >> "$GITHUB_OUTPUT"
 
       - name: push to registry
