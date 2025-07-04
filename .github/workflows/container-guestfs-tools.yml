@@ -24,9 +24,9 @@ jobs:
       - name: run buildah
         uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
         with:
-          tags: libguestfs:_build
+          tags: guestfs-tools:_build
           context: containers/guestfs-tools
-          containerfiles: Containerfile
+          containerfiles: ./Containerfile
           oci: true
 
       - name: get guestfs-tools version
