@@ -26,7 +26,6 @@ jobs:
       - name: build the version
         run: >-
           buildah bud --layers --format oci --tls-verify=true
-          --target rootless
           -t ${IMAGE_NAME}:_build
           containers/${IMAGE_NAME}
 
