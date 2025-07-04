@@ -4,7 +4,7 @@ on:
     branches:
       - main
     paths:
-      - containers/guestfs-tools/*
+      - containers/guestfs-tools/Containerfile
       - .github/workflows/container-guestfs-tools.yml
   workflow_dispatch:
   schedule:
