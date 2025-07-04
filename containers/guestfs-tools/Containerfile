@@ -1,4 +1,4 @@
-FROM quay.io/fedora/fedora:42@sha256:4dbbd380279652e4abe39349f0c0ccc85a1487a70889f7be836bc1c62e7aee16
+FROM quay.io/fedora/fedora:42
 RUN dnf upgrade --refresh
 RUN dnf install --setopt=install_weak_deps=False -y guestfs-tools
 
