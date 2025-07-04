@@ -1,0 +1,56 @@
+name: build guestfs-tools container image
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - containers/guestfs-tools/*
+      - .github/workflows/container-guestfs-tools.yml
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/guestfs_tools
+
+jobs:
+  build:
+    name: build container image
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: run buildah
+        uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056 # v2.13
+        with:
+          tags: libguestfs:_build
+          context: containers/guestfs-tools
+          containerfiles: Containerfile
+          oci: true
+
+      - name: get guestfs-tools version
+        id: get_version
+        run: >-
+          pkg_version="$(
+            podman run --rm guestfs-tools:_build
+            rpm --query --queryformat '%{VERSION}\n' guestfs-tools
+          )"
+
+          printf 'pkg_version=%s\n' "$pkg_version" >> "$GITHUB_OUTPUT"
+
+      - name: tag the container image
+        id: tag_image
+        run: |-
+          img_tags="$img_tags ${IMAGE}:latest"
+          img_tags="$img_tags ${IMAGE}:${{ steps.get_version.outputs.pkg_version }}"
+          img_tags="$img_tags ${IMAGE}:$(date -I)"
+          podman tag guestfs-tools:_build "$img_tags"
+          printf 'img_tags=%s\n' "$img_tags" >> "$GITHUB_OUTPUT"
+
+      - name: push to registry
+        uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
+        with:
+          tags: ${{ steps.tag_image.outputs.img_tags }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
