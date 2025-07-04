@@ -13,7 +13,7 @@ on:
 env:
   IMAGE_NAME: guestfs-tools
   IMAGE: ghcr.io/${{ github.repository_owner }}/guestfs-tools
-  GET_VERSION_CMD: rpm --query --queryformat '%{VERSION}\n' guestfs-tools
+  GET_VERSION_CMD: "rpm --query --queryformat '%{VERSION}' guestfs-tools"
 
 jobs:
   build:
