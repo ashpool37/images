@@ -1,13 +1,6 @@
-FROM quay.io/fedora/fedora:42
+FROM quay.io/fedora/fedora:42 AS base
 RUN dnf upgrade --refresh
 RUN dnf install --setopt=install_weak_deps=False -y guestfs-tools
-
-RUN useradd -m virt
-
-WORKDIR /home/virt
-USER virt
-
-# ---
 
 LABEL org.opencontainers.image.authors="Artem Zhurikhin <github.code@ash.pw>"
 LABEL org.opencontainers.image.url="https://github.com/ashpool37/images"
@@ -16,8 +9,14 @@ LABEL org.opencontainers.image.source="https://github.com/ashpool37/images"
 LABEL org.opencontainers.image.title="ashpool37/libguestfs"
 LABEL org.opencontainers.image.description="inspect & modify VM images"
 
-# ---
+RUN useradd -m virt
+WORKDIR /home/virt
 
 ENV LIBGUESTFS_BACKEND=direct
 
+FROM base AS rootless
+USER virt
+CMD ["/usr/bin/guestfish", "-a", "guest.img"]
+
+FROM base AS rootful
 CMD ["/usr/bin/guestfish", "-a", "guest.img"]

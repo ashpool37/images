@@ -23,10 +23,18 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
-      - name: run buildah
+      - name: build the rootless version
         run: >-
-          buildah bud --format oci --tls-verify=true
+          buildah bud --layers --format oci --tls-verify=true
+          --target rootless
           -t ${IMAGE_NAME}:_build
+          containers/${IMAGE_NAME}
+
+      - name: build the rootful version
+        run: >-
+          buildah bud --layers --format oci --tls-verify=true
+          --target rootful
+          -t ${IMAGE_NAME}_root:_build
           containers/${IMAGE_NAME}
 
       - name: get binary version
@@ -35,7 +43,7 @@ jobs:
           bin_version="$(podman run --rm ${IMAGE_NAME}:_build ${GET_VERSION_CMD})"
           printf 'bin_version=%s\n' "$bin_version" >> "$GITHUB_OUTPUT"
 
-      - name: tag the container image
+      - name: tag the rootless container image
         id: tag_image
         run: |-
           img_tags="${IMAGE}:latest"
@@ -44,9 +52,18 @@ jobs:
           podman tag "${IMAGE_NAME}:_build" $img_tags
           printf 'img_tags=%s' "$img_tags" >> "$GITHUB_OUTPUT"
 
+      - name: tag the rootful container image
+        id: tag_image_rootful
+        run: |-
+          img_tags="${IMAGE}_root:latest"
+          img_tags="$img_tags ${IMAGE}_root:${{ steps.get_version.outputs.bin_version }}"
+          img_tags="$img_tags ${IMAGE}_root:$(date -I)"
+          podman tag "${IMAGE_NAME}_root:_build" $img_tags
+          printf 'img_tags=%s' "$img_tags" >> "$GITHUB_OUTPUT"
+
       - name: push to registry
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
-          tags: ${{ steps.tag_image.outputs.img_tags }}
+          tags: ${{ steps.tag_image.outputs.img_tags }} ${{ steps.tag_image_rootful.outputs.img_tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
