@@ -13,7 +13,7 @@ on:
 env:
   IMAGE_NAME: guestfs-tools
   IMAGE: ghcr.io/${{ github.repository_owner }}/guestfs-tools
-  GET_VERSION_CMD: "rpm --query --queryformat '%{VERSION}' guestfs-tools"
+  GET_VERSION_CMD: rpm --query --queryformat "%{VERSION}" guestfs-tools
 
 jobs:
   build:
@@ -38,11 +38,11 @@ jobs:
       - name: tag the container image
         id: tag_image
         run: |-
-          img_tags="$img_tags ${IMAGE}:latest"
+          img_tags="${IMAGE}:latest"
           img_tags="$img_tags ${IMAGE}:${{ steps.get_version.outputs.bin_version }}"
           img_tags="$img_tags ${IMAGE}:$(date -I)"
-          podman tag "${IMAGE_NAME}:_build" "$img_tags"
-          printf 'img_tags=%s\n' "$img_tags" >> "$GITHUB_OUTPUT"
+          podman tag "${IMAGE_NAME}:_build" $img_tags
+          printf 'img_tags=%s' "$img_tags" >> "$GITHUB_OUTPUT"
 
       - name: push to registry
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
