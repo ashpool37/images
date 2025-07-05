@@ -2,7 +2,7 @@
 
 A Fedora-based image containing `guestfs-tools` and its dependencies.
 
-The binaries are run as a non-root user inside the container, so privilege mapping is necessary. `--userns=keep-id` works with Podman.
+The binaries are run as a non-root user inside the container, so id mapping is necessary. `--userns=keep-id` works with Podman when running rootless. Use `--user 0:0` to run the binaries as root.
 
 ## Example usage
 
