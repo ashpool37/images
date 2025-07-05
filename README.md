@@ -11,4 +11,4 @@ For now there's only OCI containers, but I may add some other types of stuff lik
 
 ## Licence
 
-The contents of this Git repository are released under the Unlicense, a Public Domain-equivalent licence. See LICENSE for details. The packages themselves contain a lot of software packages distributed by the Fedora project that are subject to their own respective licences.
+The contents of this Git repository are released under the Unlicense, a Public Domain-equivalent licence. See LICENSE for details. The images themselves contain a lot of software packages distributed by various Open Source projects that are subject to their own respective licences.
